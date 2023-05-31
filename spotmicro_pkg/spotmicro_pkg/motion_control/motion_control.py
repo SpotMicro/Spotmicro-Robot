@@ -24,10 +24,10 @@ class MotionControl(Node):
         self.robot = Robot()
         self.spur_width = self.robot.W/2+20
         self.key_array = ['w', 'a', 's', 'd', 'q', 'e']
-        self.lp = np.array([[120, -50, self.spur_width, 1],
-                            [120, -50, -self.spur_width, 1],
-                            [-60, -55, self.spur_width, 1],
-                            [-60, -55, -self.spur_width, 1]])
+        self.lp = np.array([[120, -100, self.spur_width, 1],
+                            [120, -100, -self.spur_width, 1],
+                            [-60, -100, self.spur_width, 1],
+                            [-60, -100, -self.spur_width, 1]])
 
         self.joint_angle = []
         self.joy_x, self.joy_y, self.joy_z, self.joy_rz = 128, 128, 128, 128

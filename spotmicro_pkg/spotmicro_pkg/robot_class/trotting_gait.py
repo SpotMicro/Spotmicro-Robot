@@ -10,10 +10,10 @@ class TrottingGait:
         self.bodyPos=(0,100,0)
         self.bodyRot=(0,0,0)
         self.t0=500
-        self.t1=400 #leg lift
-        self.Sl=80.0
+        self.t1=500 #leg lift
+        self.Sl=20.0
         self.Sw=0
-        self.Sh=100 #100
+        self.Sh=30 #100
         self.Sa=0
         self.Spf=87
         self.Spr=77
@@ -105,19 +105,20 @@ class TrottingGait:
         spf=self.Spf
         spr=self.Spr
         # self.Sh=60.0
-
         Tt=(self.t0+self.t1)
-
+        Tt2 = Tt/2
+        rd = Tt2/2
         # rd=0 # rear delta - unused - maybe stupid
-        # td=(t*1000)%Tt
-        # t2=(t*1000-Tt2)%Tt
-        # rtd=(t*1000-rd)%Tt # rear time delta
-        # rt2=(t*1000-Tt2-rd)%Tt
-        Tt4=Tt/5
         td=(t*1000)%Tt
-        t2=(t*1000-Tt4*3)%Tt
-        rtd=(t*1000-Tt4*4)%Tt
-        rt2=(t*1000-Tt4*2)%Tt
+        t2=(t*1000-Tt2)%Tt
+        rtd=(t*1000-rd)%Tt # rear time delta
+        rt2=(t*1000-Tt2-rd)%Tt
+        #TODO Rear 3/4 delayed
+        # Tt4=Tt/4
+        # td=(t*1000-Tt4-Tt4*3)%Tt
+        # t2=(t*1000-(Tt4*(2/4))-Tt4*3)%Tt
+        # rtd=(t*1000-(Tt4*(1/4))-Tt4*3)%Tt
+        # rt2=(t*1000-(Tt4*(3/4))-Tt4*3)%Tt
         Fx=self.Fo
         Rx=-1*self.Ro
         Fy=-100
