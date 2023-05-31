@@ -17,11 +17,11 @@ class Controllers:
 
         for i in range(0, 16):
             if i < 3 or i > 12:
-                self._servos.append(servo.Servo(self._pca_1.channels[i], min_pulse=450, max_pulse=2500))
+                self._servos.append(servo.Servo(self._pca_1.channels[i], min_pulse=500, max_pulse=2500))
         for i in range(0, 16):
             if i < 3 or i > 12:
-                self._servos.append(servo.Servo(self._pca_2.channels[i], min_pulse=450, max_pulse=2500))
-        self._servo_offsets = [180, 104, 93, 10, 90, 93, 179, 90, 80, -15, 95, 92]
+                self._servos.append(servo.Servo(self._pca_2.channels[i], min_pulse=500, max_pulse=2500))
+        self._servo_offsets = [180, 98, 90, 11, 90, 90, 187, 92, 80, -1, 93, 90]
 
         self._val_list = [ x for x in range(12) ]
 
