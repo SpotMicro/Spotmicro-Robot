@@ -1,0 +1,9 @@
+#request constants
+float32[3] leg1
+float32[3] leg2
+float32[3] leg3
+float32[3] leg4
+
+---
+
+bool confirm

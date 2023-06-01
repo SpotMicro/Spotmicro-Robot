@@ -11,14 +11,14 @@ class TrottingGait:
         self.bodyRot=(0,0,0)
         self.t0=500
         self.t1=500 #leg lift
-        self.Sl=20.0
+        self.Sl=50.0
         self.Sw=0
-        self.Sh=30 #100
+        self.Sh=5 #100
         self.Sa=0
         self.Spf=87
         self.Spr=77
-        self.Fo=120
-        self.Ro=55
+        self.Fo=100
+        self.Ro=70
         self.Sra = (self.Spf**2+((self.Fo+self.Ro)/2)**2)
 
         self.Rc=[-50,0,0,1] # rotation center
@@ -45,6 +45,7 @@ class TrottingGait:
         elif(t<self.t0+self.t1): # Lift foot
             td= t-self.t0
             tp=1/(self.t1/td)
+
             diffLp=startLp-endLp
             curLp=endLp+diffLp*tp
             curLp[1]+=self.Sh*math.sin(math.pi*tp)
@@ -58,14 +59,15 @@ class TrottingGait:
         return self.calcLeg(t,startLp,endLp)
 
     def forwardMove(self,t,x,y,z):
-        startLp=np.array([x+self.Sl/2.0,y,z-self.Sw,1])
+        startLp=np.array([x+self.Sl,y,z-self.Sw,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
-        endLp=np.array([x-self.Sl/2,y+endY,z+self.Sw,1])
+        endLp=np.array([x,y+endY,z+self.Sw,1])
 
         return self.calcLeg(t,startLp,endLp)
 
     def leftMove(self,t,x,y,z):
         startLp=np.array([x,y,z-self.Sw,1])
+
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
         endLp=np.array([x,y+endY,z+self.Sw+self.Sl/2,1])
 
@@ -82,6 +84,7 @@ class TrottingGait:
         startLp=np.array([x,y,z-self.Sw,1])
         endY=0
         if x > 0:
+
             endLp=np.array([math.sqrt(self.Sra-(z-self.Sl/8)**2), y+endY, z-self.Sl/8, 1])
         else:
             endLp=np.array([math.sqrt(self.Sra-(z+self.Sl/8)**2), y+endY, z+self.Sl/8, 1])
@@ -123,6 +126,7 @@ class TrottingGait:
         Rx=-1*self.Ro
         Fy=-100
         Ry=-100
-        r=np.array([self.calcLegFucntions[key_idx](td,Fx,Fy,spf),self.calcLegFucntions[key_idx](t2,Fx,Fy,-spf),self.calcLegFucntions[key_idx](rt2,Rx,Ry+5,spr),self.calcLegFucntions[key_idx](rtd,Rx,Ry+5,-spr)])
+        r=np.array([self.calcLegFucntions[key_idx](td,Fx,Fy,spf),self.calcLegFucntions[key_idx](t2,Fx,Fy,-spf),self.calcLegFucntions[key_idx](rt2,Rx,Ry,spr),self.calcLegFucntions[key_idx](rtd,Rx,Ry,-spr)])
         #print(r)
         return r
+

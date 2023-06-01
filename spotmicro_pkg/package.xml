@@ -9,7 +9,7 @@
 
   <depend>rclpy</depend>
   <depend>std_msg</depend>
-  <depend>degree_msg_interface</depend>
+  <depend>servo_controller_srv_interface</depend>
   <depend>numpy</depend>
   <depend>math</depend>
   <depend>time</depend>

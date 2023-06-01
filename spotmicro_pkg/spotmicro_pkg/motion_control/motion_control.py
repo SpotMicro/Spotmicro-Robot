@@ -5,21 +5,22 @@ import threading
 
 from mpu6050 import mpu6050
 
+import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy
 from std_msgs.msg import String
 from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 
-from degree_msg_interface.msg import JointAngle
+from servo_controller_srv_interface.srv import JointAngle
 from spotmicro_pkg.robot_class.trotting_gait import TrottingGait
 from spotmicro_pkg.robot_class.spotmicroai import Robot
-from spotmicro_pkg.robot_class.controller import Controllers
 
 class MotionControl(Node):
     def __init__(self):
         super().__init__('motion_control')
+        print('motion_control start')
         self.key_value = None
-        self.controller = Controllers()
         self.trotting_gait = TrottingGait()
         self.robot = Robot()
         self.spur_width = self.robot.W/2+20
@@ -31,7 +32,7 @@ class MotionControl(Node):
 
         self.joint_angle = []
         self.joy_x, self.joy_y, self.joy_z, self.joy_rz = 128, 128, 128, 128
-        self.height = 30
+        self.height = 10
         self.rtime = time.time()
 
         self.callback_group = ReentrantCallbackGroup()
@@ -51,8 +52,11 @@ class MotionControl(Node):
 
         #TODO self.imu_subscriber
 
-        self.motor_degree_publisher = self.create_publisher(JointAngle, 'motor_degree', QOS_RKL10V)
-        self.leg_point_publisher = self.create_publisher(JointAngle, 'leg_point', QOS_RKL10V)
+        self.servo_controller_service_client = self.create_client(
+            JointAngle,
+            'servo_control_operator'
+        )
+        # self.leg_point_publisher = self.create_publisher(JointAngle, 'leg_point', QOS_RKL10V)
 
         self.run_thread = threading.Thread(target=self.run)
         self.keyboard_input_thread = threading.Thread(target=self.subscrib_keyboard_input_msg)
@@ -64,14 +68,24 @@ class MotionControl(Node):
         self.key_value = msg.data
         self.get_logger().info('keyboard input msg: {0}'.format(msg.data))
 
-    def publish_leg_point(self, leg_point):
-        msg = JointAngle()
-        leg_point = leg_point.tolist()
-        msg.lp1 = leg_point[0]
-        msg.lp2 = leg_point[1]
-        msg.lp3 = leg_point[2]
-        msg.lp4 = leg_point[3]
-        self.leg_point_publisher.publish(msg)
+    # def publish_leg_point(self, leg_point):
+    #     msg = JointAngle()
+    #     leg_point = leg_point.tolist()
+    #     msg.lp1 = leg_point[0]
+    #     msg.lp2 = leg_point[1]
+    #     msg.lp3 = leg_point[2]
+    #     msg.lp4 = leg_point[3]
+    #     self.leg_point_publisher.publish(msg)
+
+    def send_request_servo_controller(self):
+        service_request = JointAngle.Request()
+        joint_angle = self.joint_angle.tolist()
+        service_request.leg1 = joint_angle[0]
+        service_request.leg2 = joint_angle[1]
+        service_request.leg3 = joint_angle[2]
+        service_request.leg4 = joint_angle[3]
+        res = self.servo_controller_service_client.call_async(service_request)
+        return res
 
     def reset(self):
         self.rtime = time.time()
@@ -102,13 +116,31 @@ class MotionControl(Node):
             bodyX=50+0*10
             self.robot.bodyPosition((bodyX, 40+self.height, 0))
 
-            self.publish_leg_point(self.robot.getLp())
+            # self.publish_leg_point(self.robot.getLp())
 
             self.joint_angle = self.robot.getAngle()
 
             if len(self.joint_angle):
-                self.controller.servoRotate(self.joint_angle)
+                self.send_request_servo_controller()
                 self.get_logger().info('degree: {0}'.format(self.joint_angle))
             self.robot.step()
 
 
+def main(args=None):
+    rclpy.init(args=args)
+    try:
+        node = MotionControl()
+        executor = MultiThreadedExecutor(num_threads=3)
+        executor.add_node(node)
+        try:
+            executor.spin()
+        except KeyboardInterrupt:
+            node.get_logger().info('keyboard Interrupt')
+        finally:
+            executor.shutdown()
+            node.destroy_node()
+    finally:
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

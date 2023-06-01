@@ -2,7 +2,7 @@
 # Set minimum required version of cmake, project name and compile options
 ################################################################################
 cmake_minimum_required(VERSION 3.5)
-project(degree_msg_interface)
+project(servo_controller_srv_interface)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -22,12 +22,13 @@ find_package(rosidl_default_generators REQUIRED)
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
-set(msg_files
-  "msg/JointAngle.msg"
+
+set(srv_files
+  "srv/JointAngle.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  ${msg_files}
+  ${srv_files}
   DEPENDENCIES builtin_interfaces
 )
 

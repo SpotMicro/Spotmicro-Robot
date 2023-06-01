@@ -21,9 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'communication = spotmicro_pkg.communication.main:main',
-            'motion_control = spotmicro_pkg.motion_control.main:main',
-            'servo_control = spotmicro_pkg.servo_control.main:main',
-            'motion_simulation = spotmicro_pkg.motion_simulation.main:main'
+            'motion_control = spotmicro_pkg.motion_control.motion_control:main',
+            'servo_control = spotmicro_pkg.motion_control.servo_controller:main',
+            'motion_simulation = spotmicro_pkg.motion_simulation.main:main',
         ],
     },
 )
