@@ -9,9 +9,11 @@ class TrottingGait:
         self.maxSl=2
         self.bodyPos=(0,100,0)
         self.bodyRot=(0,0,0)
-        self.t0=500
-        self.t1=500 #leg lift
-        self.Sl=50.0
+        self.t0=0 #0 # senseless i guess
+        self.t1=1000 #1000
+        self.t2=0 #0
+        self.t3=200
+        self.Sl=100.0
         self.Sw=0
         self.Sh=5 #100
         self.Sa=0
@@ -29,9 +31,12 @@ class TrottingGait:
     calculates the Lp - LegPosition for the configured gait for time t and original Lp of x,y,z
     """
     def calcLeg(self, t, startLp, endLp):
-        if(t<self.t0): # drag foot over ground
+        if(t<self.t0): # TODO: remove t0 and t2 - not practical
+            return startLp
+        elif(t<self.t0+self.t1): # drag foot over ground
 
-            tp=1/(self.t0)
+            td=t-self.t0
+            tp=1/(self.t1/td)
             diffLp=endLp-startLp
             curLp=startLp+diffLp*tp
             psi=-((math.pi/180*self.Sa)/2)+(math.pi/180*self.Sa)*tp
@@ -41,11 +46,11 @@ class TrottingGait:
             #Tlm = np.array([[0,0,0,-self.Rc[0]],[0,0,0,-self.Rc[1]],[0,0,0,-self.Rc[2]],[0,0,0,0]])
             curLp=Ry.dot(curLp)
             return curLp
-
-        elif(t<self.t0+self.t1): # Lift foot
-            td= t-self.t0
-            tp=1/(self.t1/td)
-
+        elif(t<self.t0+self.t1+self.t2):
+            return endLp
+        elif(t<self.t0+self.t1+self.t2+self.t3): # Lift foot
+            td=t-(self.t0+self.t1+self.t2)
+            tp=1/(self.t3/td)
             diffLp=startLp-endLp
             curLp=endLp+diffLp*tp
             curLp[1]+=self.Sh*math.sin(math.pi*tp)
@@ -81,7 +86,7 @@ class TrottingGait:
         return self.calcLeg(t,startLp,endLp)
 
     def turnLeftMove(self,t,x,y,z):
-        startLp=np.array([x,y,z-self.Sw,1])
+        startLp=np.array([x,y,z-self.Swi,1])
         endY=0
         if x > 0:
 
@@ -108,7 +113,7 @@ class TrottingGait:
         spf=self.Spf
         spr=self.Spr
         # self.Sh=60.0
-        Tt=(self.t0+self.t1)
+        Tt=(self.t0+self.t1+self.t2+self.t3)
         Tt2 = Tt/2
         rd = Tt2/2
         # rd=0 # rear delta - unused - maybe stupid
