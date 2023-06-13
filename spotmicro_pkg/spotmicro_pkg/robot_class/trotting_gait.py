@@ -10,12 +10,12 @@ class TrottingGait:
         self.bodyPos=(0,100,0)
         self.bodyRot=(0,0,0)
         self.t0=0 #0 # senseless i guess
-        self.t1=1000 #1000
+        self.t1=600 #1000
         self.t2=0 #0
-        self.t3=200
-        self.Sl=100.0
+        self.t3=300
+        self.Sl=60.0
         self.Sw=0
-        self.Sh=5 #100
+        self.Sh=15 #100
         self.Sa=0
         self.Spf=87
         self.Spr=77
@@ -57,9 +57,9 @@ class TrottingGait:
             return curLp
 
     def backMove(self,t,x,y,z):
-        startLp=np.array([x-self.Sl/2.0,y,z-self.Sw,1])
+        startLp=np.array([x,y,z-self.Sw,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
-        endLp=np.array([x+self.Sl/2,y+endY,z+self.Sw,1])
+        endLp=np.array([x+self.Sl,y+endY,z+self.Sw,1])
 
         return self.calcLeg(t,startLp,endLp)
 
@@ -71,22 +71,21 @@ class TrottingGait:
         return self.calcLeg(t,startLp,endLp)
 
     def leftMove(self,t,x,y,z):
-        startLp=np.array([x,y,z-self.Sw,1])
-
+        startLp=np.array([x,y,z-self.Sw-self.Sl/3,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
-        endLp=np.array([x,y+endY,z+self.Sw+self.Sl/2,1])
+        endLp=np.array([x,y+endY,z+self.Sw+self.Sl/3,1])
 
         return self.calcLeg(t,startLp,endLp)
 
     def rightMove(self,t,x,y,z):
-        startLp=np.array([x,y,z-self.Sw,1])
+        startLp=np.array([x,y,z-self.Sw+self.Sl/3,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
-        endLp=np.array([x,y+endY,z+self.Sw-self.Sl/2,1])
+        endLp=np.array([x,y+endY,z+self.Sw-self.Sl/3,1])
 
         return self.calcLeg(t,startLp,endLp)
 
     def turnLeftMove(self,t,x,y,z):
-        startLp=np.array([x,y,z-self.Swi,1])
+        startLp=np.array([x,y,z-self.Sw,1])
         endY=0
         if x > 0:
 
@@ -116,7 +115,7 @@ class TrottingGait:
         Tt=(self.t0+self.t1+self.t2+self.t3)
         Tt2 = Tt/2
         rd = Tt2/2
-        # rd=0 # rear delta - unused - maybe stupid
+        rd=0 # rear delta - unused - maybe stupid
         td=(t*1000)%Tt
         t2=(t*1000-Tt2)%Tt
         rtd=(t*1000-rd)%Tt # rear time delta

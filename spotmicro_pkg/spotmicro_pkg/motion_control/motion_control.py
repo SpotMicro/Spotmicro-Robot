@@ -23,12 +23,13 @@ class MotionControl(Node):
         self.key_value = None
         self.trotting_gait = TrottingGait()
         self.robot = Robot()
+        # self.imu = mpu6050(0x68)
         self.spur_width = self.robot.W/2+20
         self.key_array = ['w', 'a', 's', 'd', 'q', 'e']
-        self.lp = np.array([[120, -100, self.spur_width, 1],
-                            [120, -100, -self.spur_width, 1],
-                            [-60, -100, self.spur_width, 1],
-                            [-60, -100, -self.spur_width, 1]])
+        self.lp = np.array([[100, -100, self.spur_width, 1],
+                            [100, -100, -self.spur_width, 1],
+                            [-70, -100, self.spur_width, 1],
+                            [-70, -100, -self.spur_width, 1]])
 
         self.joint_angle = []
         self.joy_x, self.joy_y, self.joy_z, self.joy_rz = 128, 128, 128, 128
@@ -93,6 +94,7 @@ class MotionControl(Node):
     def run(self):
         while True:
             d = time.time()-self.rtime
+            # gyro_data = self.imu.get_gyro_data()
 
             if self.key_value in self.key_array and self.key_value is not None:
                 current_lp = self.trotting_gait.positions(d, self.key_array.index(self.key_value))
