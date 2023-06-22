@@ -115,7 +115,7 @@ class MotionControl(Node):
 
             roll, pitch = self.mpu.compFilter()
 
-            self.robot.bodyRotation((roll*math.pi/180, 0, pitch*math.pi/180))
+            self.robot.bodyRotation((-1*roll*math.pi/180, 0, pitch*math.pi/180))
             # self.robot.bodyRotation((0, 0,-(1/256*self.joy_y-0.5)))
             bodyX=50+0*10
             self.robot.bodyPosition((bodyX, 40+self.height, 0))
