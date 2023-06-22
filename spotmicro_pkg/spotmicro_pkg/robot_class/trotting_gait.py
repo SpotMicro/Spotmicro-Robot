@@ -10,17 +10,17 @@ class TrottingGait:
         self.bodyPos=(0,100,0)
         self.bodyRot=(0,0,0)
         self.t0=0 #0 # senseless i guess
-        self.t1=1000 #1000
+        self.t1=400 #1000
         self.t2=0 #0
         self.t3=200
-        self.Sl=100.0
+        self.Sl=70.0
         self.Sw=0
-        self.Sh=5 #100
+        self.Sh=20 #100
         self.Sa=0
         self.Spf=87
         self.Spr=77
-        self.Fo=100
-        self.Ro=70
+        self.Fo=120
+        self.Ro=80
         self.Sra = (self.Spf**2+((self.Fo+self.Ro)/2)**2)
 
         self.Rc=[-50,0,0,1] # rotation center
@@ -57,16 +57,16 @@ class TrottingGait:
             return curLp
 
     def backMove(self,t,x,y,z):
-        startLp=np.array([x-self.Sl/2.0,y,z-self.Sw,1])
+        startLp=np.array([x-self.Sl/2,y,z-self.Sw,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
         endLp=np.array([x+self.Sl/2,y+endY,z+self.Sw,1])
 
         return self.calcLeg(t,startLp,endLp)
 
     def forwardMove(self,t,x,y,z):
-        startLp=np.array([x+self.Sl,y,z-self.Sw,1])
+        startLp=np.array([x+self.Sl/2,y,z-self.Sw,1])
         endY=0 #-0.8 # delta y to jump a bit before lifting legs
-        endLp=np.array([x,y+endY,z+self.Sw,1])
+        endLp=np.array([x-self.Sl/2,y+endY,z+self.Sw,1])
 
         return self.calcLeg(t,startLp,endLp)
 
@@ -86,7 +86,7 @@ class TrottingGait:
         return self.calcLeg(t,startLp,endLp)
 
     def turnLeftMove(self,t,x,y,z):
-        startLp=np.array([x,y,z-self.Swi,1])
+        startLp=np.array([x,y,z-self.Sw,1])
         endY=0
         if x > 0:
 
