@@ -23,13 +23,34 @@ class MPU:
         self.dtTimer = 0
         self.tau = tau
 
-        self.gyroScaleFactor, self.gyroHex = self.gyroSensitivity(gyro)
-        self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
+        self.gyroScaleFactor, self.gyroHex = self.__gyroSensitivity(gyro)
+        self.accScaleFactor, self.accHex = self.__accelerometerSensitivity(acc)
 
         self.bus = smbus.SMBus(1)
         self.address = 0x68
 
-    def gyroSensitivity(self, x):
+    def __eightBit2sixteenBit(self, reg):
+        # Reads high and low 8 bit values and shifts them into 16 bit
+        h = self.bus.read_byte_data(self.address, reg)      # high value
+        l = self.bus.read_byte_data(self.address, reg+1)    # low value : 1비트 차이난다. 
+        val = (h << 8) + l                                  # 16비트로 업비트
+
+        # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
+        if (val >= 0x8000):
+            return -((65535 - val) + 1)
+        else:
+            return val
+
+    def __getRawData(self):
+        self.gx = self.__eightBit2sixteenBit(0x43)
+        self.gy = self.__eightBit2sixteenBit(0x45)
+        self.gz = self.__eightBit2sixteenBit(0x47)
+
+        self.ax = self.__eightBit2sixteenBit(0x3B)
+        self.ay = self.__eightBit2sixteenBit(0x3D)
+        self.az = self.__eightBit2sixteenBit(0x3F)
+
+    def __gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
         return {
             250:  [131.0, 0x00],
@@ -38,7 +59,7 @@ class MPU:
             2000: [16.4,  0x18]
         }.get(x,  [65.5,  0x08])
 
-    def accelerometerSensitivity(self, x):
+    def __accelerometerSensitivity(self, x):
         # Create dictionary with standard value of 4 g
         return {
             2:  [16384.0, 0x00],
@@ -46,6 +67,25 @@ class MPU:
             8:  [4096.0,  0x10],
             16: [2048.0,  0x18]
         }.get(x,[8192.0,  0x08])
+    
+    def __processIMUvalues(self):
+        # Update the raw data
+        self.__getRawData()
+
+        # Subtract the offset calibration values
+        self.gx -= self.gyroXcal
+        self.gy -= self.gyroYcal
+        self.gz -= self.gyroZcal
+
+        # Convert to instantaneous degrees per second
+        self.gx /= self.gyroScaleFactor
+        self.gy /= self.gyroScaleFactor
+        self.gz /= self.gyroScaleFactor
+
+        # Convert to g force
+        self.ax /= self.accScaleFactor
+        self.ay /= self.accScaleFactor
+        self.az /= self.accScaleFactor
 
     def setUp(self):
         # Activate the MPU-6050
@@ -62,27 +102,6 @@ class MPU:
         print('\tAccelerometer: ' + str(self.accHex) + ' ' + str(self.accScaleFactor))
         print('\tGyro: ' + str(self.gyroHex) + ' ' + str(self.gyroScaleFactor) + "\n")
         time.sleep(2)
-
-    def eightBit2sixteenBit(self, reg):
-        # Reads high and low 8 bit values and shifts them into 16 bit
-        h = self.bus.read_byte_data(self.address, reg)
-        l = self.bus.read_byte_data(self.address, reg+1)
-        val = (h << 8) + l
-
-        # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
-        if (val >= 0x8000):
-            return -((65535 - val) + 1)
-        else:
-            return val
-
-    def getRawData(self):
-        self.gx = self.eightBit2sixteenBit(0x43)
-        self.gy = self.eightBit2sixteenBit(0x45)
-        self.gz = self.eightBit2sixteenBit(0x47)
-
-        self.ax = self.eightBit2sixteenBit(0x3B)
-        self.ay = self.eightBit2sixteenBit(0x3D)
-        self.az = self.eightBit2sixteenBit(0x3F)
 
     def calibrateGyro(self, N):
         # Display message
@@ -108,28 +127,9 @@ class MPU:
         time.sleep(2)
         self.dtTimer = time.time()
 
-    def processIMUvalues(self):
-        # Update the raw data
-        self.getRawData()
-
-        # Subtract the offset calibration values
-        self.gx -= self.gyroXcal
-        self.gy -= self.gyroYcal
-        self.gz -= self.gyroZcal
-
-        # Convert to instantaneous degrees per second
-        self.gx /= self.gyroScaleFactor
-        self.gy /= self.gyroScaleFactor
-        self.gz /= self.gyroScaleFactor
-
-        # Convert to g force
-        self.ax /= self.accScaleFactor
-        self.ay /= self.accScaleFactor
-        self.az /= self.accScaleFactor
-
     def compFilter(self):
         # Get the processed values from IMU
-        self.processIMUvalues()
+        self.__processIMUvalues()
 
         # Get delta time and record time for next call
         dt = time.time() - self.dtTimer
